@@ -137,6 +137,7 @@ if (signupBtn) {
 }
 
 // RESET PASSWORD
+
 if (forgotBtn) {
   forgotBtn.addEventListener('click', async () => {
     setMessage('');
@@ -148,17 +149,24 @@ if (forgotBtn) {
     }
 
     setMessage('Enviando enlace de recuperación...');
-    const redirectTo = window.location.origin + '/reset.html';
+
+    // 👉 Esto construye bien la URL tanto en localhost
+    //    como en GitHub Pages (/LaNegritaStitchHouse/reset.html)
+    const redirectTo = new URL('reset.html', window.location.href).href;
+    console.log('[reset] usando redirectTo =', redirectTo);
 
     const { error } = await supabaseLoginClient.auth.resetPasswordForEmail(email, {
       redirectTo,
     });
 
     if (error) {
+      console.error('[reset] error resetPasswordForEmail:', error);
       setMessage(error.message || 'No se pudo enviar el correo de recuperación.', true);
       return;
     }
 
+    console.log('[reset] correo de recuperación solicitado correctamente');
     setMessage('Te enviamos un correo con el enlace para restablecer tu contraseña.');
   });
+
 }
