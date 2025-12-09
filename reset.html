@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Restablecer contraseña · La Negrita Stitch House</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #EEE7D5;
+      --text: #1F2933;
+      --primary: #D52B1C;
+      --primary-dark: #B21E13;
+      --radius: 14px;
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(120% 120% at 20% 20%, #fff7e6, #eee7d5);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+    }
+    .card {
+      width: min(420px, 100%);
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 1.75rem;
+    }
+    h1 {
+      margin: 0 0 0.4rem;
+      font-family: "Pacifico", cursive;
+      color: var(--primary);
+      text-align: center;
+    }
+    p.sub {
+      margin: 0 0 1.5rem;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    form {
+      display: grid;
+      gap: 0.9rem;
+    }
+    label {
+      font-size: 0.9rem;
+      color: #374151;
+    }
+    input {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+    }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .message {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+      min-height: 1.2rem;
+      text-align: center;
+    }
+    .message.error { color: var(--primary); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Restablecer contraseña</h1>
+    <p class="sub">Ingresa tu nueva contraseña para continuar.</p>
+    <p id="msg" class="message"></p>
+    <form id="reset-form" class="hidden">
+      <div>
+        <label for="password">Nueva contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required>
+      </div>
+      <button id="submit-btn" type="submit" class="btn-primary">Guardar</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://wcpyvpvyoqmrukmvqfwt.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjcHl2cHZ5b3FtcnVrbXZxZnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMTc4MDYsImV4cCI6MjA3OTY5MzgwNn0.EeFMe4x3A0R9wFsmv11R6ru2bqHS_00W5C38x2jgFio';
+
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const msg = document.getElementById('msg');
+    const form = document.getElementById('reset-form');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function setMessage(text, isError = false) {
+      msg.textContent = text;
+      msg.classList.toggle('error', isError);
+    }
+
+    // ✅ Flujo correcto para reset por correo
+    async function handleRecovery() {
+      setMessage('Verificando enlace, espera un momento...');
+
+      // Supabase ya debería haber creado una sesión si el enlace es válido
+      const { data, error } = await client.auth.getSession();
+
+      if (error) {
+        console.error(error);
+      }
+
+      if (!data || !data.session) {
+        setMessage(
+          'El enlace no es válido o ya expiró. Vuelve a solicitar un correo desde la pantalla de acceso.',
+          true
+        );
+        form.classList.add('hidden');
+        return;
+      }
+
+      // Hay sesión válida → dejamos cambiar la contraseña
+      setMessage('Ingresa tu nueva contraseña.');
+      form.classList.remove('hidden');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+
+      const newPassword = passwordInput.value.trim();
+
+      if (newPassword.length < 6) {
+        setMessage('La contraseña debe tener al menos 6 caracteres.', true);
+        submitBtn.disabled = false;
+        return;
+      }
+
+      setMessage('Guardando nueva contraseña...');
+
+      const { error } = await client.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        console.error(error);
+        setMessage(error.message || 'No se pudo actualizar la contraseña.', true);
+        submitBtn.disabled = false;
+        return;
+      }
+
+      setMessage('Contraseña actualizada. Te llevamos a la pantalla de acceso...');
+      form.classList.add('hidden');
+
+      // Cerramos sesión y redirigimos a login
+      setTimeout(async () => {
+        await client.auth.signOut();
+        window.location.href = 'login.html';
+      }, 1500);
+    });
+
+    // Ejecutar al cargar
+    handleRecovery();
+  </script>
+</body>
+</html>

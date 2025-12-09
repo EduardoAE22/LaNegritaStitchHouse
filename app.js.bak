@@ -1,0 +1,433 @@
+// app.js
+
+// PON AQUÍ EL NÚMERO REAL (SIN +)
+const WHATSAPP_NUMBER = '529381952228';
+const CART_STORAGE_KEY = 'ln_cart';
+// sha256 del PIN elegido. Calculado por defecto con "1234".
+const ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+
+// Estado
+let products = [];
+let cart = [];
+let isAdmin = localStorage.getItem('ln_admin') === '1';
+let activeCategory = 'all';
+
+// ELEMENTOS DOM
+const productsGrid = document.getElementById('products-grid');
+const productsFeedback = document.getElementById('products-feedback');
+const filterButtonsContainer = document.getElementById('filter-buttons');
+const cartBtn = document.getElementById('cart-btn');
+const cartCount = document.getElementById('cart-count');
+const cartPanel = document.getElementById('cart-panel');
+const cartOverlay = document.getElementById('cart-overlay');
+const closeCartBtn = document.getElementById('close-cart');
+const cartItemsContainer = document.getElementById('cart-items');
+const cartTotalEl = document.getElementById('cart-total');
+const cartWhatsappBtn = document.getElementById('cart-whatsapp');
+const adminBtn = document.getElementById('admin-btn');
+const menuToggle = document.getElementById('menu-toggle');
+const headerNav = document.querySelector('.header__nav');
+const menuOverlay = document.getElementById('menu-overlay');
+
+// 1. Cargar productos desde JSON
+async function loadProducts() {
+  setProductsFeedback('Cargando catálogo...', false);
+
+  try {
+    const res = await fetch('products.json');
+    const data = await res.json();
+
+    // Mezclar imágenes de localStorage (si hay)
+    products = data.map(p => {
+      const storedImg = localStorage.getItem('ln_product_image_' + p.id);
+      if (storedImg) {
+        return { ...p, imagen: storedImg };
+      }
+      return p;
+    });
+
+    buildFilters(products);
+    renderProducts();
+    setProductsFeedback('', false);
+  } catch (err) {
+    console.error('Error cargando productos:', err);
+    setProductsFeedback('No se pudieron cargar los productos. Revisa tu conexión e intenta de nuevo.', true);
+  }
+}
+
+function setProductsFeedback(message, isError = false) {
+  productsFeedback.textContent = message;
+  productsFeedback.classList.toggle('products-feedback--error', !!isError);
+}
+
+function buildFilters(productList) {
+  const categories = Array.from(new Set(productList.map(p => p.categoria).filter(Boolean)));
+  const allCats = ['all', ...categories];
+
+  filterButtonsContainer.innerHTML = '';
+
+  allCats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'filter-btn';
+    btn.textContent = cat === 'all' ? 'Todos' : cat.charAt(0).toUpperCase() + cat.slice(1);
+    btn.dataset.cat = cat;
+    btn.classList.toggle('is-active', activeCategory === cat);
+    btn.addEventListener('click', () => {
+      activeCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      renderProducts();
+    });
+    filterButtonsContainer.appendChild(btn);
+  });
+}
+
+// 2. Renderizar catálogo
+function renderProducts() {
+  productsGrid.innerHTML = '';
+
+  const visible = activeCategory === 'all'
+    ? products
+    : products.filter(product => product.categoria === activeCategory);
+
+  if (!products.length) {
+    setProductsFeedback('Aún no hay productos cargados.', false);
+    return;
+  }
+
+  if (!visible.length) {
+    setProductsFeedback('No hay productos en esta categoría.', false);
+    return;
+  }
+
+  setProductsFeedback('', false);
+
+  visible.forEach(product => {
+    const card = document.createElement('article');
+    card.className = 'product-card';
+
+    // Botón/área de imagen
+    const imgBtn = document.createElement('button');
+    imgBtn.type = 'button';
+    imgBtn.className = 'product-card__image-btn';
+    imgBtn.dataset.id = product.id;
+
+    if (!isAdmin) {
+      imgBtn.classList.add('disabled');
+    }
+
+    if (product.imagen) {
+      const img = document.createElement('img');
+      img.src = product.imagen;
+      img.alt = product.nombre;
+      imgBtn.appendChild(img);
+    } else {
+      const placeholder = document.createElement('span');
+      placeholder.className = 'product-card__image-placeholder';
+      placeholder.textContent = isAdmin ? 'Añadir imagen' : 'Imagen pendiente';
+      imgBtn.appendChild(placeholder);
+    }
+
+    // Click en imagen (solo admin)
+    if (isAdmin) {
+      imgBtn.addEventListener('click', () => handleImageClick(product));
+    }
+
+    // Info
+    const body = document.createElement('div');
+    body.className = 'product-card__body';
+
+    const title = document.createElement('h3');
+    title.textContent = product.nombre;
+
+    const price = document.createElement('p');
+    price.className = 'product-card__price';
+    price.textContent = `$${product.precio} MXN`;
+
+    const desc = document.createElement('p');
+    desc.className = 'product-card__desc';
+    desc.textContent = product.descripcion;
+
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'btn-primary btn-full';
+    btnAdd.type = 'button';
+    btnAdd.textContent = 'Agregar al carrito';
+    btnAdd.addEventListener('click', () => addToCart(product));
+
+    body.appendChild(title);
+    body.appendChild(price);
+    body.appendChild(desc);
+    body.appendChild(btnAdd);
+
+    card.appendChild(imgBtn);
+    card.appendChild(body);
+    productsGrid.appendChild(card);
+  });
+}
+
+// 3. Imagen como admin
+function handleImageClick(product) {
+  const hasImage = !!product.imagen;
+  let continueChange = true;
+
+  if (hasImage) {
+    continueChange = confirm('Este producto ya tiene una imagen.\n¿Deseas cambiarla?');
+  }
+
+  if (!continueChange) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+
+      // Guardar en localStorage
+      localStorage.setItem('ln_product_image_' + product.id, dataUrl);
+
+      // Actualizar y volver a renderizar
+      product.imagen = dataUrl;
+      renderProducts();
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  input.click();
+}
+
+// 4. Carrito
+function addToCart(product) {
+  const existing = cart.find(item => item.id === product.id);
+  if (existing) {
+    existing.cantidad += 1;
+  } else {
+    cart.push({
+      id: product.id,
+      nombre: product.nombre,
+      precio: product.precio,
+      cantidad: 1
+    });
+  }
+
+  updateCartBadge();
+  renderCart();
+  persistCart();
+  openCart();
+}
+
+function updateCartBadge() {
+  const totalItems = cart.reduce((sum, item) => sum + item.cantidad, 0);
+  cartCount.textContent = totalItems;
+}
+
+function renderCart() {
+  cartItemsContainer.innerHTML = '';
+
+  if (cart.length === 0) {
+    cartItemsContainer.textContent = 'Tu carrito está vacío.';
+    cartTotalEl.textContent = '$0 MXN';
+    return;
+  }
+
+  let total = 0;
+
+  cart.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+
+    const info = document.createElement('div');
+    info.className = 'cart-item__info';
+    info.innerHTML = `<strong>${item.nombre}</strong><br>$${item.precio} MXN c/u`;
+
+    const qty = document.createElement('div');
+    qty.className = 'cart-item__qty';
+
+    const btnMinus = document.createElement('button');
+    btnMinus.className = 'cart-item__btn';
+    btnMinus.textContent = '-';
+    btnMinus.addEventListener('click', () => changeQty(item.id, -1));
+
+    const spanQty = document.createElement('span');
+    spanQty.textContent = item.cantidad;
+
+    const btnPlus = document.createElement('button');
+    btnPlus.className = 'cart-item__btn';
+    btnPlus.textContent = '+';
+    btnPlus.addEventListener('click', () => changeQty(item.id, 1));
+
+    qty.appendChild(btnMinus);
+    qty.appendChild(spanQty);
+    qty.appendChild(btnPlus);
+
+    row.appendChild(info);
+    row.appendChild(qty);
+    cartItemsContainer.appendChild(row);
+
+    total += item.precio * item.cantidad;
+  });
+
+  cartTotalEl.textContent = `$${total} MXN`;
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+
+  item.cantidad += delta;
+  if (item.cantidad <= 0) {
+    cart = cart.filter(i => i.id !== id);
+  }
+
+  updateCartBadge();
+  renderCart();
+  persistCart();
+}
+
+function persistCart() {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
+
+function loadCartFromStorage() {
+  const stored = localStorage.getItem(CART_STORAGE_KEY);
+  if (!stored) return [];
+  try {
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed)) {
+      return parsed.map(item => ({
+        id: item.id,
+        nombre: item.nombre,
+        precio: item.precio,
+        cantidad: item.cantidad
+      })).filter(item => item.id && item.cantidad > 0);
+    }
+  } catch (error) {
+    console.warn('No se pudo leer el carrito guardado', error);
+  }
+  return [];
+}
+
+// 5. Panel carrito
+function openCart() {
+  cartPanel.classList.add('cart-panel--open');
+  cartOverlay.classList.add('cart-overlay--open');
+}
+
+function closeCart() {
+  cartPanel.classList.remove('cart-panel--open');
+  cartOverlay.classList.remove('cart-overlay--open');
+}
+
+// 6. WhatsApp con carrito
+function sendCartToWhatsApp() {
+  if (cart.length === 0) {
+    const text = 'Hola, quiero más información sobre los productos de La Negrita Stitch House.';
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+    return;
+  }
+
+  let text = 'Hola, me gustaría hacer este pedido en La Negrita Stitch House:\n\n';
+
+  cart.forEach(item => {
+    text += `• ${item.cantidad} x ${item.nombre} — ${item.precio} MXN c/u\n`;
+  });
+
+  const total = cart.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  text += `\nTotal aproximado: ${total} MXN\n`;
+  text += '\n¿Me ayudas con la disponibilidad, tiempos y formas de pago, por favor?';
+
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+// 7. Menú móvil
+function toggleMenu() {
+  const isOpen = headerNav.classList.toggle('is-open');
+  menuOverlay.classList.toggle('menu-overlay--open', isOpen);
+}
+
+function closeMenu() {
+  headerNav.classList.remove('is-open');
+  menuOverlay.classList.remove('menu-overlay--open');
+}
+
+// 8. Modo administrador
+function enableAdminMode() {
+  if (isAdmin) {
+    const confirmExit = confirm('¿Deseas salir del modo administrador?');
+    if (confirmExit) {
+      isAdmin = false;
+      localStorage.removeItem('ln_admin');
+      updateAdminUI();
+      renderProducts();
+    }
+    return;
+  }
+
+  const pin = prompt('Ingresa el PIN de administrador:');
+  if (!pin) return;
+
+  validateAdminPin(pin.trim());
+}
+
+async function hashString(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function validateAdminPin(pin) {
+  try {
+    const hashed = await hashString(pin);
+    if (hashed === ADMIN_PIN_HASH) {
+      isAdmin = true;
+      localStorage.setItem('ln_admin', '1');
+      alert('Modo administrador activado.');
+      updateAdminUI();
+      renderProducts();
+    } else {
+      alert('PIN incorrecto.');
+    }
+  } catch (error) {
+    console.error('Error validando PIN', error);
+    alert('No se pudo validar el PIN en este momento. Intenta de nuevo.');
+  }
+}
+
+function updateAdminUI() {
+  adminBtn.textContent = isAdmin ? 'Admin activo' : 'Admin';
+  adminBtn.classList.toggle('is-active', isAdmin);
+}
+
+// EVENTOS
+cartBtn.addEventListener('click', openCart);
+closeCartBtn.addEventListener('click', closeCart);
+cartOverlay.addEventListener('click', closeCart);
+cartWhatsappBtn.addEventListener('click', sendCartToWhatsApp);
+adminBtn.addEventListener('click', enableAdminMode);
+menuToggle.addEventListener('click', toggleMenu);
+menuOverlay.addEventListener('click', closeMenu);
+document.querySelectorAll('.header__nav a').forEach(link => {
+  link.addEventListener('click', closeMenu);
+});
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) closeMenu();
+});
+
+// Inicializar
+cart = loadCartFromStorage();
+updateCartBadge();
+renderCart();
+updateAdminUI();
+loadProducts();

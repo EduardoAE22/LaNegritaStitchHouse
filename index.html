@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ 
+  <meta charset="UTF-8" />
+  <title>La Negrita Stitch House</title>
+  <meta name="descripcion" content="Tienda de ropa, bolsas y accesorios hechos a mano en Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
+
+  <!-- Favicons e íconos para dispositivos -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.__SUPABASE_URL = 'https://wcpyvpvyoqmrukmvqfwt.supabase.co';
+    window.__SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjcHl2cHZ5b3FtcnVrbXZxZnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMTc4MDYsImV4cCI6MjA3OTY5MzgwNn0.EeFMe4x3A0R9wFsmv11R6ru2bqHS_00W5C38x2jgFio';
+  </script>
+  
+</head>
+
+<body>
+  <!-- SPLASH / PANTALLA DE CARGA -->
+  <div id="splash" class="splash">
+    <div class="splash__content">
+      <div class="splash__circle">
+        <img
+          src="img/splash-maquina-cociendo.jpeg"
+          alt="La Negrita Stitch House"
+          class="splash__logo"
+        />
+      </div>
+      <p class="splash__text">
+        Preparando tus piezas hechas a mano...
+      </p>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <button id="menu-toggle" class="header__menu-btn" aria-label="Abrir menú">
+      ☰
+    </button>
+    <div class="header__logo">
+      <img src="img/logo-la-negrita-stitch-house.jpeg" alt="La Negrita Stitch House" class="logo-img">
+    </div>
+
+    <nav class="header__nav">
+      <a href="#inicio">Inicio</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#hecho-a-mano">Hecho a mano</a>
+      <a href="#personalizados">Personalizados</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+
+    <div class="header__actions">
+      <button id="admin-btn" class="btn-outline" type="button">Admin</button>
+      <button id="cart-btn" class="btn-icon" aria-label="Carrito">
+        🛒 <span id="cart-count" class="cart-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+      <div class="hero__text">
+        <span class="hero__badge">Hecho a mano en México</span>
+        <h1>Ropa, bolsas y accesorios con toque artesanal.</h1>
+        <p class="hero__subtitle">
+          La Negrita Stitch House convierte telas e hilos en piezas únicas:
+          bolsas, ropa y detallitos hechos a mano con amor.
+        </p>
+        <div class="hero__actions">
+          <a href="#catalogo" class="btn-primary">Ver catálogo</a>
+          <a href="https://wa.me/529381952228?text=Hola,%20quiero%20información%20sobre%20los%20productos%20de%20La%20Negrita%20Stitch%20House"
+             class="btn-outline" target="_blank" rel="noopener">
+            Encargar por WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="hero__image">
+        <img src="img/logo-la-negrita-stitch-house.jpeg"
+             alt="La Negrita Stitch House"
+             class="hero__logo-img">
+      </div>
+    </section>
+
+    <!-- CATEGORÍAS (puedes llenarlas después si quieres) -->
+    <section id="catalogo" class="section">
+      <div class="section__header section__header--with-actions">
+        <div>
+          <h2>Categorías</h2>
+          <p>Explora lo que La Negrita Stitch House puede crear para ti.</p>
+        </div>
+        <div class="section__header-actions" aria-label="Acciones de categorías">
+          <button id="cat-add-btn" class="icon-btn" type="button" title="Agregar categoría">+</button>
+          <button id="cat-edit-btn" class="icon-btn" type="button" title="Editar categoría">✏️</button>
+          <button id="cat-delete-btn" class="icon-btn" type="button" title="Eliminar categoría">🗑️</button>
+        </div>
+      </div>
+      <div class="grid-categories">
+        <article class="category-card">
+          <h3>Ropa</h3>
+          <p>Blusas, vestidos, faldas y más.</p>
+          <ul class="category-items" data-cat="Ropa"></ul>
+        </article>
+        <article class="category-card">
+          <h3>Bolsas</h3>
+          <p>Bolsas de mano, crossbody, tote bags.</p>
+          <ul class="category-items" data-cat="Bolsas"></ul>
+        </article>
+        <article class="category-card">
+          <h3>Accesorios</h3>
+          <p>Scrunchies, monederos, detallitos.</p>
+          <ul class="category-items" data-cat="Accesorios"></ul>
+        </article>
+        <article class="category-card">
+          <h3>Edición especial</h3>
+          <p>Colecciones de temporada y piezas únicas.</p>
+          <ul class="category-items" data-cat="Edición especial"></ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO DINÁMICO -->
+    <section id="catalogo-destacado" class="section section--light">
+      <div class="section__header">
+        <h2>Piezas destacadas</h2>
+        <p>Cada pieza es hecha a mano y puede personalizarse.</p>
+      </div>
+      <div id="admin-panel" class="admin-panel">
+        <div class="admin-panel__header">
+          <strong>Panel admin</strong>
+          <span id="admin-status" class="admin-panel__status">Acceso solo para administradores autorizados</span>
+        </div>
+        <form id="admin-form" class="admin-form">
+          <input type="hidden" id="product-id" name="id">
+
+          <div class="admin-form__grid">
+            <label>
+              Nombre
+              <input id="product-nombre" name="nombre" type="text" required>
+            </label>
+            <label>
+              Precio (MXN)
+              <input id="product-precio" name="precio" type="number" step="0.01" required>
+            </label>
+            <label>
+              Piezas disponibles
+              <input
+                id="product-stock"
+                name="stock"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Ej. 5"
+              >
+            </label>
+            <label>
+              Categoría
+              <select id="product-categoria" name="categoria" required>
+                <option value="">Selecciona categoría</option>
+                <option value="Ropa">Ropa</option>
+                <option value="Bolsas">Bolsas</option>
+                <option value="Accesorios">Accesorios</option>
+                <option value="Edición especial">Edición especial</option>
+              </select>
+            </label>
+            <label class="admin-form__span2">
+              Descripción
+              <textarea id="product-descripcion" name="descripcion" rows="2"></textarea>
+            </label>
+            <label class="admin-form__span2">
+              Imagen (opcional)
+              <input id="product-imagen" name="imagen" type="file" accept="image/*">
+            </label>
+          </div>
+          <div class="admin-form__actions">
+            <button type="submit" class="btn-primary">Guardar</button>
+            <button type="button" id="admin-reset" class="btn-outline">Limpiar</button>
+          </div>
+        </form>
+      </div>
+      <!-- PANEL DE PEDIDOS (solo admin) -->
+      <section id="admin-orders" class="admin-orders admin-only section section--light">
+        <div class="section__header">
+          <h2>Pedidos recientes</h2>
+          <p>Solo visible para administración. Aquí puedes marcar pedidos como pagados o cancelados.</p>
+        </div>
+
+        <div class="admin-orders__table-wrapper">
+          <table class="admin-orders__table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody">
+              <!-- JS inyecta filas aquí -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <div class="product-toolbar">
+        <div id="filter-buttons" class="filter-buttons">
+          <!-- JS inyecta filtros -->
+        </div>
+        <p id="products-feedback" class="products-feedback" role="status" aria-live="polite"></p>
+      </div>
+      <div id="products-grid" class="grid-products">
+        <!-- JS inyecta aquí las tarjetas de producto -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN HECHO A MANO -->
+    <section id="hecho-a-mano" class="section">
+      <div class="section__two-cols">
+        <div>
+          <h2>Hecho a mano, pieza por pieza</h2>
+          <p>
+            Cada prenda y accesorio se trabaja en casa, con máquina de coser
+            y acabados a mano. No hay producciones masivas: cuidamos los
+            detalles para que sientas que la pieza fue creada para ti.
+          </p>
+          <p>
+            Desde elegir la tela hasta el último pespunte, todo el proceso
+            se hace con dedicación y cariño.
+          </p>
+        </div>
+        <div class="section__photo-placeholder">
+          <span class="badge badge--yellow">Taller casero</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERSONALIZADOS -->
+    <section id="personalizados" class="section section--light">
+      <div class="section__header">
+        <h2>Pedidos personalizados</h2>
+        <p>¿Tienes una idea en mente? La cosemos juntas.</p>
+      </div>
+      <div class="section__two-cols">
+        <ul class="custom-list">
+          <li>Vestidos y blusas a la medida.</li>
+          <li>Bolsas con colores y telas a elección.</li>
+          <li>Arreglos y ajustes de ropa.</li>
+          <li>Regalos personalizados para ocasiones especiales.</li>
+        </ul>
+        <div class="custom-cta">
+          <p>
+            Mándanos foto o referencia de lo que quieres y te ayudamos a
+            llevarlo a la realidad.
+          </p>
+          <a class="btn-primary"
+             href="https://wa.me/529381952228?text=Hola,%20quisiera%20un%20pedido%20personalizado%20con%20La%20Negrita%20Stitch%20House."
+             target="_blank" rel="noopener">
+            Platicar mi idea por WhatsApp
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section id="contacto" class="section">
+      <div class="section__header">
+        <h2>Contacto</h2>
+        <p>Escríbenos para cotizaciones, tiempos de entrega y detalles.</p>
+      </div>
+      <div class="contact">
+        <p><strong>WhatsApp:</strong> +52 938 195 2228</p>
+        <p><strong>Instagram:</strong> @lanegrita.stitch.house</p>
+        <p><strong>Facebook:</strong> La Negrita Stitch House</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- CARRITO -->
+  <aside id="cart-panel" class="cart-panel">
+    <div class="cart-panel__header">
+      <h3>Tu carrito</h3>
+      <button id="close-cart" class="cart-panel__close">✕</button>
+    </div>
+    <div id="cart-items" class="cart-panel__items"></div>
+    <div class="cart-panel__footer">
+      <p>Total: <strong id="cart-total">$0 MXN</strong></p>
+      <button id="cart-whatsapp" class="btn-primary btn-full">
+        Finalizar pedido por WhatsApp
+      </button>
+    </div>
+  </aside>
+  <div id="cart-overlay" class="cart-overlay"></div>
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> La Negrita Stitch House · Hecho a mano en México.</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+  <script src="app.js"></script>
+
+  <!-- Modal para ver la imagen en grande -->
+  <div id="image-modal" class="image-modal">
+    <div id="image-modal-overlay" class="image-modal__overlay"></div>
+    <div class="image-modal__content">
+      <button id="image-modal-close" type="button" class="image-modal__close">
+        &times;
+      </button>
+      <img id="image-modal-img" src="" alt="Imagen del producto">
+      <p id="image-modal-caption" class="image-modal__caption"></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso · La Negrita Stitch House</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #EEE7D5;
+      --text: #1F2933;
+      --primary: #D52B1C;
+      --primary-dark: #B21E13;
+      --radius: 14px;
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(120% 120% at 20% 20%, #fff7e6, #eee7d5);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+    }
+    .card {
+      width: min(420px, 100%);
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 1.75rem;
+    }
+    h1 {
+      margin: 0 0 0.4rem;
+      font-family: "Pacifico", cursive;
+      color: var(--primary);
+      text-align: center;
+    }
+    p.sub {
+      margin: 0 0 1.5rem;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    form {
+      display: grid;
+      gap: 0.9rem;
+    }
+    label {
+      font-size: 0.9rem;
+      color: #374151;
+    }
+    input {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+    }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .link {
+      text-align: center;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .link:hover { text-decoration: underline; }
+    .message {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #6b7280;
+      min-height: 1.2rem;
+      text-align: center;
+    }
+    .message.error { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Acceso</h1>
+    <p class="sub">Inicia sesión o crea tu cuenta para continuar.</p>
+    <p id="msg" class="message"></p>
+    <form id="auth-form">
+      <div>
+        <label for="email">Correo</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+      </div>
+      <div>
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button id="submit-btn" type="submit" class="btn-primary">Iniciar sesión</button>
+      <button id="forgot-btn" type="button" class="link">Olvidé mi contraseña</button>
+    
+      <p class="auth__hint">
+        ¿Aún no tienes una cuenta?
+        <a href="signup.html">Crea una cuenta</a>
+      </p>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="login.js"></script>
+</body>
+</html>

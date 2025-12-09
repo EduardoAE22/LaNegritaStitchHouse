@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "nombre": "Bolsa bordada “Flores”",
+    "precio": 650,
+    "descripcion": "Bolsa de lona con bordado floral artesanal.",
+    "categoria": "bolsas",
+    "imagen": ""
+  },
+  {
+    "id": 2,
+    "nombre": "Vestido casual “Luna”",
+    "precio": 850,
+    "descripcion": "Vestido ligero ideal para clima cálido.",
+    "categoria": "ropa",
+    "imagen": ""
+  },
+  {
+    "id": 3,
+    "nombre": "Set de scrunchies",
+    "precio": 180,
+    "descripcion": "Set de 3 scrunchies personalizables.",
+    "categoria": "accesorios",
+    "imagen": ""
+  }
+]
