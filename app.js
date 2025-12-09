@@ -41,6 +41,9 @@ const adminBtn = document.getElementById('admin-btn');
 const catAddBtn = document.getElementById('cat-add-btn');
 const catEditBtn = document.getElementById('cat-edit-btn');
 const catDeleteBtn = document.getElementById('cat-delete-btn');
+const categoryCards = document.querySelectorAll('.category-card');
+
+
 // Modal imagen producto
 const imageModal = document.getElementById('image-modal');
 const imageModalOverlay = document.getElementById('image-modal-overlay');
@@ -251,6 +254,29 @@ function buildFilters(list) {
   });
 }
 
+function applyCategoryFilter(categoryName) {
+  if (!categoryName) return;
+
+  // Seteamos categoría activa
+  activeCategory = categoryName;
+
+  // Actualizar botones de filtro visualmente
+  document.querySelectorAll('.filter-btn').forEach((btn) => {
+    const btnCat = btn.dataset.cat;
+    btn.classList.toggle('is-active', btnCat === categoryName);
+  });
+
+  // Renderizar productos con ese filtro
+  renderProducts();
+
+  // Hacer scroll suave al catálogo
+  const section = document.getElementById('catalogo-destacado');
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+
 function renderProducts() {
   productsGrid.innerHTML = '';
 
@@ -388,7 +414,8 @@ function renderProducts() {
     productsGrid.appendChild(card);
   });
 
-  renderCategoryItems();
+  // Ya no rellenamos las listas de categorías dinámicas
+  //renderCategoryItems();
 }
 
 // Imagen admin -> Storage
@@ -1309,6 +1336,15 @@ async function handleAdminSubmit(e) {
 // =========================
 // EVENTOS
 // =========================
+if (categoryCards && categoryCards.length) {
+  categoryCards.forEach((card) => {
+    const cat = card.dataset.cat;
+    if (!cat) return;
+    card.addEventListener('click', () => {
+      applyCategoryFilter(cat);
+    });
+  });
+}
 
 if (cartBtn) cartBtn.addEventListener('click', openCart);
 if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);

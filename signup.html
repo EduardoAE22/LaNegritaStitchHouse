@@ -5,82 +5,88 @@
   <title>Crear cuenta | La Negrita Stitch House</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Tus estilos generales -->
+  <!-- Estilos generales -->
   <link rel="stylesheet" href="styles.css" />
 
   <!-- Supabase JS (igual que en index/login) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="auth-body">
-  <header class="auth-header">
-    <a href="index.html" class="auth-logo">
-      La Negrita Stitch House
-    </a>
-  </header>
+
+<body class="auth-page">
+  <!-- Link arriba para volver a la tienda -->
+  <a href="index.html" class="auth-logo-link">
+    La Negrita Stitch House
+  </a>
 
   <main class="auth-main">
     <section class="auth-card">
-      <h1>Crear cuenta</h1>
-      <p>Regístrate para guardar tus datos y pedidos.</p>
+      <h1 class="auth-title">Crear cuenta</h1>
+      <p class="auth-subtitle">
+        Regístrate para guardar tus datos y pedidos.
+      </p>
 
       <form id="signup-form" class="auth-form">
-        <label>
-          Nombre completo
+        <div class="auth-field">
+          <label for="signup-name">Nombre completo</label>
           <input
+            id="signup-name"
             type="text"
             name="name"
             required
             autocomplete="name"
           />
-        </label>
+        </div>
 
-        <label>
-          Correo electrónico
+        <div class="auth-field">
+          <label for="signup-email">Correo electrónico</label>
           <input
+            id="signup-email"
             type="email"
             name="email"
             required
             autocomplete="email"
           />
-        </label>
+        </div>
 
-        <label>
-          Contraseña
+        <div class="auth-field">
+          <label for="signup-password">Contraseña</label>
           <input
+            id="signup-password"
             type="password"
             name="password"
             required
             minlength="6"
             autocomplete="new-password"
           />
-        </label>
+        </div>
 
-        <label>
-          Repetir contraseña
+        <div class="auth-field">
+          <label for="signup-password2">Repetir contraseña</label>
           <input
+            id="signup-password2"
             type="password"
             name="password2"
             required
             minlength="6"
             autocomplete="new-password"
           />
-        </label>
+        </div>
 
-        <button type="submit" class="btn-primary btn-full">
+        <p
+          id="signup-message"
+          class="auth-message"
+          aria-live="polite"
+        ></p>
+
+        <button type="submit" class="btn-primary auth-submit">
           Crear cuenta
         </button>
       </form>
 
-      <p class="auth__hint">
+      <p class="auth-switch">
         ¿Ya tienes cuenta?
         <a href="login.html">Inicia sesión</a>
       </p>
-
-      <p
-        id="signup-message"
-        class="auth-message"
-        aria-live="polite"
-      ></p>
     </section>
   </main>
 
