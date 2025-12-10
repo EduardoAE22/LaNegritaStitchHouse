@@ -1651,14 +1651,15 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   await loadProducts();
 
   if (isAdmin) {
-    await loadOrders();
+    // No bloqueamos el splash con llamadas de admin que pueden tardar
+    loadOrders().catch((err) => {
+      console.error('[orders] fallo al cargar en el inicio', err);
+    });
 
-    // 🚫 IMPORTANTE: NO hacemos "await" aquí, lo lanzamos en segundo plano
-    loadAnalytics()
-    .catch((err) => {
-          console.error('[analytics] fallo al cargar en el inicio', err);
-          resetAnalyticsUI();
-        });
+    loadAnalytics().catch((err) => {
+      console.error('[analytics] fallo al cargar en el inicio', err);
+      resetAnalyticsUI();
+    });
   }else {
     resetAnalyticsUI();
   }
@@ -1702,4 +1703,3 @@ function hideSplash() {
     }
   }, 600);
 }
-
