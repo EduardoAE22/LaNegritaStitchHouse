@@ -705,6 +705,86 @@ main {
   cursor: default;
 }
 
+/* =========================
+   PANEL DE ANALÍTICA / VENTAS
+   ========================= */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.analytics-card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem 1.1rem;
+}
+
+.analytics-card__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.analytics-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.86rem;
+}
+
+.analytics-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+  color: #4b5563;
+}
+
+.analytics-list li strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.analytics-label {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.analytics-value {
+  margin: 0.1rem 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.analytics-table-wrapper {
+  margin-top: 1.5rem;
+}
+
+.analytics-table__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.analytics-table__subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 .cart-panel__close {
   border: none;
   background: transparent;
@@ -909,17 +989,6 @@ main {
   color: #6b7280;
 }
 
-.footer-dev {
-  display: inline-block;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-.auth-footer {
-  text-align: center;
-  padding: 1rem 0 2rem;
-}
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
@@ -1079,4 +1148,40 @@ main {
   .auth-card {
     padding: 1.5rem 1.25rem;
   }
+}
+
+/* ====== Firma en pantallas de auth (login / signup / reset) ====== */
+.auth-footer {
+  text-align: center;
+  padding: 1.5rem 1rem 2.5rem;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.auth-footer__divider {
+  display: block;
+  width: 120px;
+  height: 1px;
+  margin: 0 auto 0.8rem;
+  background: rgba(148, 163, 184, 0.4); /* gris suave */
+  border-radius: 999px;
+}
+
+.auth-footer__text {
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.auth-footer__text strong {
+  font-weight: 600;
+  color: #4b5563; /* gris más oscuro */
+}
+
+.auth-footer__brand {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.auth-footer__dot {
+  margin: 0 0.25rem;
 }

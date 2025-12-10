@@ -1,96 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Crear cuenta | La Negrita Stitch House</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Crear cuenta | La Negrita Stitch House</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Estilos generales -->
-  <link rel="stylesheet" href="styles.css" />
+    <!-- Estilos generales -->
+    <link rel="stylesheet" href="styles.css" />
 
-  <!-- Supabase JS (igual que en index/login) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+    <!-- Supabase JS (igual que en index/login) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
 
-<body class="auth-page">
-  <!-- Link arriba para volver a la tienda -->
-  <a href="index.html" class="auth-logo-link">
-    La Negrita Stitch House
-  </a>
+  <body class="auth-page">
+    <!-- Link arriba para volver a la tienda -->
+    <a href="index.html" class="auth-logo-link">
+      La Negrita Stitch House
+    </a>
 
-  <main class="auth-main">
-    <section class="auth-card">
-      <h1 class="auth-title">Crear cuenta</h1>
-      <p class="auth-subtitle">
-        Regístrate para guardar tus datos y pedidos.
-      </p>
+    <main class="auth-main">
+      <section class="auth-card">
+        <h1 class="auth-title">Crear cuenta</h1>
+        <p class="auth-subtitle">
+          Regístrate para guardar tus datos y pedidos.
+        </p>
 
-      <form id="signup-form" class="auth-form">
-        <div class="auth-field">
-          <label for="signup-name">Nombre completo</label>
-          <input
-            id="signup-name"
-            type="text"
-            name="name"
-            required
-            autocomplete="name"
-          />
-        </div>
+        <form id="signup-form" class="auth-form">
+          <div class="auth-field">
+            <label for="signup-name">Nombre completo</label>
+            <input
+              id="signup-name"
+              type="text"
+              name="name"
+              required
+              autocomplete="name"
+            />
+          </div>
 
-        <div class="auth-field">
-          <label for="signup-email">Correo electrónico</label>
-          <input
-            id="signup-email"
-            type="email"
-            name="email"
-            required
-            autocomplete="email"
-          />
-        </div>
+          <div class="auth-field">
+            <label for="signup-email">Correo electrónico</label>
+            <input
+              id="signup-email"
+              type="email"
+              name="email"
+              required
+              autocomplete="email"
+            />
+          </div>
 
-        <div class="auth-field">
-          <label for="signup-password">Contraseña</label>
-          <input
-            id="signup-password"
-            type="password"
-            name="password"
-            required
-            minlength="6"
-            autocomplete="new-password"
-          />
-        </div>
+          <div class="auth-field">
+            <label for="signup-password">Contraseña</label>
+            <input
+              id="signup-password"
+              type="password"
+              name="password"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
 
-        <div class="auth-field">
-          <label for="signup-password2">Repetir contraseña</label>
-          <input
-            id="signup-password2"
-            type="password"
-            name="password2"
-            required
-            minlength="6"
-            autocomplete="new-password"
-          />
-        </div>
+          <div class="auth-field">
+            <label for="signup-password2">Repetir contraseña</label>
+            <input
+              id="signup-password2"
+              type="password"
+              name="password2"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
 
-        <p
-          id="signup-message"
-          class="auth-message"
-          aria-live="polite"
-        ></p>
+          <p
+            id="signup-message"
+            class="auth-message"
+            aria-live="polite"
+          ></p>
 
-        <button type="submit" class="btn-primary auth-submit">
-          Crear cuenta
-        </button>
-      </form>
+          <button type="submit" class="btn-primary auth-submit">
+            Crear cuenta
+          </button>
+        </form>
 
-      <p class="auth-switch">
-        ¿Ya tienes cuenta?
-        <a href="login.html">Inicia sesión</a>
-      </p>
-    </section>
-  </main>
+        <p class="auth-switch">
+          ¿Ya tienes cuenta?
+          <a href="login.html">Inicia sesión</a>
+        </p>
+      </section>
+    </main>
 
-  <!-- Lógica de registro -->
-  <script type="module" src="signup.js"></script>
-</body>
+    <!-- Lógica de registro -->
+    <script type="module" src="signup.js"></script>
+
+      <!-- Firma del Ing Eduardo Acosta-->
+      <footer class="auth-footer">
+        <span class="auth-footer__divider"></span>
+          <p class="auth-footer__text">
+            Sitio desarrollado por
+            <strong>César Eduardo Acosta Echavarría</strong>
+            <span class="auth-footer__dot">·</span>
+            <span class="auth-footer__brand">Acosta Solutions</span>
+          </p>
+      </footer>
+  </body>
 </html>

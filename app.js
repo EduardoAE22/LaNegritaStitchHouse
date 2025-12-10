@@ -66,6 +66,19 @@ const adminResetBtn = document.getElementById('admin-reset');
 const adminOrdersSection = document.getElementById('admin-orders');
 const adminOrdersTbody = document.getElementById('admin-orders-tbody');
 
+//Reporte de ventas para el administrador
+const adminAnalyticsSection = document.getElementById('admin-analytics');
+const salesTodayEl = document.getElementById('analytics-sales-today');
+const salesWeekEl = document.getElementById('analytics-sales-week');
+const salesMonthEl = document.getElementById('analytics-sales-month');
+const salesYearEl = document.getElementById('analytics-sales-year');
+const topProductEl = document.getElementById('analytics-top-product');
+const bottomProductEl = document.getElementById('analytics-bottom-product');
+const topCustomerEl = document.getElementById('analytics-top-customer');
+const bottomCustomerEl = document.getElementById('analytics-bottom-customer');
+const customersTbodyAnalytics = document.getElementById('analytics-customers-tbody');
+
+
 //Splash delay
 const SPLASH_HIDE_DELAY = 2500; // 3 segundos (ajusta al gusto)
 
@@ -122,6 +135,16 @@ function updateAdminUI() {
     adminStatus.textContent = isAdmin
       ? 'Panel admin activo'
       : 'Acceso solo para administradores autorizados';
+
+        // Panel de analítica: solo admin
+  if (adminAnalyticsSection) {
+    adminAnalyticsSection.classList.toggle('is-visible', isAdmin);
+    }
+  if (!isAdmin && customersTbodyAnalytics) {
+    customersTbodyAnalytics.innerHTML =
+      '<tr><td colspan="5">Aún no hay clientes con pedidos.</td></tr>';
+    }
+
   }
 
   const showCatActions = isAdmin && catAddBtn && catEditBtn && catDeleteBtn;
@@ -703,6 +726,35 @@ function formatOrderStatus(status) {
   return { normalized, label };
 }
 
+function formatCurrencyMXN(value) {
+  const num = Number(value) || 0;
+  return num.toLocaleString('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 2,
+  });
+}
+
+function resetAnalyticsUI() {
+  const dash = '—';
+  if (salesTodayEl) salesTodayEl.textContent = dash;
+  if (salesWeekEl) salesWeekEl.textContent = dash;
+  if (salesMonthEl) salesMonthEl.textContent = dash;
+  if (salesYearEl) salesYearEl.textContent = dash;
+
+  if (topProductEl) topProductEl.textContent = 'Sin datos aún';
+  if (bottomProductEl) bottomProductEl.textContent = 'Sin datos aún';
+  if (topCustomerEl) topCustomerEl.textContent = 'Sin datos aún';
+  if (bottomCustomerEl) bottomCustomerEl.textContent = 'Sin datos aún';
+
+  if (customersTbodyAnalytics) {
+    customersTbodyAnalytics.innerHTML =
+      '<tr><td colspan="5">Aún no hay clientes con pedidos.</td></tr>';
+  }
+}
+
+
+
 async function loadOrders() {
   if (!isAdmin || !adminOrdersTbody) {
     console.log('[orders] no es admin o no hay tbody, no cargo pedidos');
@@ -821,6 +873,193 @@ function renderOrders() {
     adminOrdersTbody.appendChild(tr);
   });
 }
+
+// =========================
+// ANALÍTICA / ESTADÍSTICAS
+// =========================
+
+async function loadAnalytics() {
+  if (!isAdmin || !adminAnalyticsSection) {
+    console.log('[analytics] no admin o no hay sección, no se carga');
+    return;
+  }
+
+  try {
+    console.log('[analytics] cargando estadísticas...');
+
+    // 1) Traemos pedidos PAGADOS (últimos 500 por si acaso)
+    const { data: paidOrders, error: ordersError } = await supabaseClient
+      .from('orders')
+      .select('id, created_at, status, total, customer_email, customer_name')
+      .eq('status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(500);
+
+    if (ordersError) throw ordersError;
+
+    if (!paidOrders || !paidOrders.length) {
+      resetAnalyticsUI();
+      return;
+    }
+
+    const orderIds = paidOrders.map((o) => o.id);
+
+    // 2) Traemos las líneas de pedido de esos pedidos
+    const { data: items, error: itemsError } = await supabaseClient
+      .from('order_items')
+      .select('order_id, product_id, product_name, quantity')
+      .in('order_id', orderIds);
+
+    if (itemsError) throw itemsError;
+
+    computeAnalytics(paidOrders, items || []);
+  } catch (err) {
+    console.error('[analytics] error cargando estadísticas', err);
+    resetAnalyticsUI();
+  }
+}
+
+function computeAnalytics(paidOrders, items) {
+  if (!paidOrders || !paidOrders.length) {
+    resetAnalyticsUI();
+    return;
+  }
+
+  const now = new Date();
+  const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startWeek = new Date(startToday);
+  startWeek.setDate(startWeek.getDate() - 6); // últimos 7 días
+  const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startYear = new Date(now.getFullYear(), 0, 1);
+
+  let totalToday = 0;
+  let totalWeek = 0;
+  let totalMonth = 0;
+  let totalYear = 0;
+
+  // Map para cruzar items con pedidos
+  const ordersById = new Map();
+  // Map de clientes
+  const customersMap = new Map();
+
+  for (const o of paidOrders) {
+    const created = new Date(o.created_at);
+    const total = Number(o.total) || 0;
+
+    ordersById.set(o.id, { ...o, created, total });
+
+    if (created >= startYear) totalYear += total;
+    if (created >= startMonth) totalMonth += total;
+    if (created >= startWeek) totalWeek += total;
+    if (created >= startToday) totalToday += total;
+
+    const emailKey = (o.customer_email || 'sin-correo').toLowerCase();
+    const existing = customersMap.get(emailKey) || {
+      email: o.customer_email || '—',
+      name: o.customer_name || '',
+      firstOrderAt: created,
+      lastOrderAt: created,
+      ordersCount: 0,
+      totalSpent: 0,
+    };
+
+    existing.ordersCount += 1;
+    existing.totalSpent += total;
+    if (created < existing.firstOrderAt) existing.firstOrderAt = created;
+    if (created > existing.lastOrderAt) existing.lastOrderAt = created;
+
+    customersMap.set(emailKey, existing);
+  }
+
+  // Productos: más y menos vendidos
+  const productMap = new Map();
+
+  for (const item of items) {
+    if (!ordersById.has(item.order_id)) continue; // por seguridad
+    const key = item.product_id || item.product_name;
+    if (!key) continue;
+
+    const existing = productMap.get(key) || {
+      productId: item.product_id,
+      name: item.product_name || `Producto #${item.product_id}`,
+      quantity: 0,
+    };
+    existing.quantity += Number(item.quantity) || 0;
+    productMap.set(key, existing);
+  }
+
+  let topProduct = null;
+  let bottomProduct = null;
+
+  for (const p of productMap.values()) {
+    if (!topProduct || p.quantity > topProduct.quantity) topProduct = p;
+    if (!bottomProduct || p.quantity < bottomProduct.quantity) bottomProduct = p;
+  }
+
+  // Clientes ordenados por consumo total
+  const customers = Array.from(customersMap.values()).sort(
+    (a, b) => b.totalSpent - a.totalSpent
+  );
+  const topCustomer = customers[0] || null;
+  const bottomCustomer = customers.length ? customers[customers.length - 1] : null;
+
+  // === Actualizar UI ===
+  if (salesTodayEl) salesTodayEl.textContent = formatCurrencyMXN(totalToday);
+  if (salesWeekEl) salesWeekEl.textContent = formatCurrencyMXN(totalWeek);
+  if (salesMonthEl) salesMonthEl.textContent = formatCurrencyMXN(totalMonth);
+  if (salesYearEl) salesYearEl.textContent = formatCurrencyMXN(totalYear);
+
+  if (topProductEl) {
+    topProductEl.textContent = topProduct
+      ? `${topProduct.name} (${topProduct.quantity} pzas)`
+      : 'Sin datos aún';
+  }
+  if (bottomProductEl) {
+    bottomProductEl.textContent = bottomProduct
+      ? `${bottomProduct.name} (${bottomProduct.quantity} pzas)`
+      : 'Sin datos aún';
+  }
+
+  if (topCustomerEl) {
+    topCustomerEl.textContent = topCustomer
+      ? `${topCustomer.name || topCustomer.email} — ${formatCurrencyMXN(
+          topCustomer.totalSpent
+        )}`
+      : 'Sin datos aún';
+  }
+  if (bottomCustomerEl) {
+    bottomCustomerEl.textContent = bottomCustomer
+      ? `${bottomCustomer.name || bottomCustomer.email} — ${formatCurrencyMXN(
+          bottomCustomer.totalSpent
+        )}`
+      : 'Sin datos aún';
+  }
+
+  if (customersTbodyAnalytics) {
+    customersTbodyAnalytics.innerHTML = '';
+    if (!customers.length) {
+      customersTbodyAnalytics.innerHTML =
+        '<tr><td colspan="5">Aún no hay clientes con pedidos.</td></tr>';
+    } else {
+      customers.forEach((c) => {
+        const tr = document.createElement('tr');
+        const firstDate = c.firstOrderAt.toLocaleString('es-MX', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        });
+        tr.innerHTML = `
+          <td>${c.name || '—'}</td>
+          <td>${c.email}</td>
+          <td>${firstDate}</td>
+          <td>${c.ordersCount}</td>
+          <td>${formatCurrencyMXN(c.totalSpent)}</td>
+        `;
+        customersTbodyAnalytics.appendChild(tr);
+      });
+    }
+  }
+}
+
 
 async function restoreStockFromOrderItems(orderId) {
   // Traemos items del pedido
@@ -1400,7 +1639,10 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   await loadProducts();
   if (isAdmin) {
     await loadOrders();
-  }
+    await loadAnalytics();
+  }else {
+    resetAnalyticsUI();
+    }
 });
 
 (async () => {
@@ -1408,6 +1650,9 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   await loadProducts();
   if (isAdmin) {
     await loadOrders();
+    await loadAnalytics();
+  }else {
+    resetAnalyticsUI();
   }
 
   // Cuando ya cargó todo, esperamos un poquito y quitamos el splash

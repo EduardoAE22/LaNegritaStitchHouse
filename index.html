@@ -216,6 +216,86 @@
           </table>
         </div>
       </section>
+
+            <!-- PANEL DE VENTAS / ANALÍTICA (solo admin) -->
+      <section id="admin-analytics" class="admin-only section section--light">
+        <div class="section__header">
+          <h2>Resumen de ventas</h2>
+          <p>Vista rápida de cómo va la tienda.</p>
+        </div>
+
+        <div class="analytics-grid">
+          <!-- Ventas -->
+          <article class="analytics-card">
+            <h3 class="analytics-card__title">Ventas</h3>
+            <ul class="analytics-list">
+              <li>
+                <span>Hoy</span>
+                <strong id="analytics-sales-today">—</strong>
+              </li>
+              <li>
+                <span>Últimos 7 días</span>
+                <strong id="analytics-sales-week">—</strong>
+              </li>
+              <li>
+                <span>Este mes</span>
+                <strong id="analytics-sales-month">—</strong>
+              </li>
+              <li>
+                <span>Este año</span>
+                <strong id="analytics-sales-year">—</strong>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Productos -->
+          <article class="analytics-card">
+            <h3 class="analytics-card__title">Productos</h3>
+            <p class="analytics-label">Más vendido</p>
+            <p id="analytics-top-product" class="analytics-value">Sin datos aún</p>
+
+            <p class="analytics-label">Menos vendido</p>
+            <p id="analytics-bottom-product" class="analytics-value">Sin datos aún</p>
+          </article>
+
+          <!-- Clientes -->
+          <article class="analytics-card">
+            <h3 class="analytics-card__title">Clientes</h3>
+            <p class="analytics-label">Cliente con más consumo</p>
+            <p id="analytics-top-customer" class="analytics-value">Sin datos aún</p>
+
+            <p class="analytics-label">Cliente con menos consumo</p>
+            <p id="analytics-bottom-customer" class="analytics-value">Sin datos aún</p>
+          </article>
+        </div>
+
+        <div class="analytics-table-wrapper">
+          <h3 class="analytics-table__title">Clientes con pedidos</h3>
+          <p class="analytics-table__subtitle">
+            Lista de clientes que ya han realizado al menos un pedido.
+          </p>
+          <div class="admin-orders__table-wrapper">
+            <table class="admin-orders__table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Correo</th>
+                  <th>Primer pedido</th>
+                  <th># Pedidos</th>
+                  <th>Total consumido</th>
+                </tr>
+              </thead>
+              <tbody id="analytics-customers-tbody">
+                <tr>
+                  <td colspan="5">Aún no hay clientes con pedidos.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
       <div class="product-toolbar">
         <div id="filter-buttons" class="filter-buttons">
           <!-- JS inyecta filtros -->
@@ -307,7 +387,12 @@
   <div id="menu-overlay" class="menu-overlay"></div>
 
   <footer class="footer">
-    <p>© <span id="year"></span> La Negrita Stitch House · Hecho a mano en México.</p>
+    <p>
+      © <span id="year"></span> La Negrita Stitch House · Hecho a mano en México.<br>
+      <span class="footer-dev">
+        Sitio desarrollado por César Eduardo Acosta Echavarría· Acosta Solutions
+      </span>
+    </p>
   </footer>
 
   <script>
