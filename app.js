@@ -1655,13 +1655,12 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
     resetAnalyticsUI();
   }
 
-  // Cuando ya cargó todo, esperamos un poquito y quitamos el splash
-  setTimeout(hideSplash, SPLASH_HIDE_DELAY);
+   hideSplash();
 
-  // Respaldo: si por algo falla lo de arriba, al terminar de cargar la ventana
   window.addEventListener('load', () => {
-    setTimeout(hideSplash, SPLASH_HIDE_DELAY);
+    hideSplash();
   });
+  
 })();
 
 console.log('✅ app.js cargado correctamente');
