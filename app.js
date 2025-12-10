@@ -1631,53 +1631,79 @@ cart = loadCartFromStorage();
 updateCartBadge();
 renderCart();
 
+// Fallback global: aunque algo truene, a los N segundos apagamos el splash sí o sí
+const SPLASH_MAX_WAIT = 7000; // 7 seg de máximo
+setTimeout(() => {
+  console.warn('[splash] fallback timeout → ocultando splash forzado');
+  try {
+    hideSplash();
+  } catch (e) {
+    console.error('[splash] error al ocultar (fallback)', e);
+    const splash = document.getElementById('splash');
+    if (splash && splash.parentNode) {
+      splash.parentNode.removeChild(splash);
+    }
+  }
+}, SPLASH_MAX_WAIT);
+
+// 🔄 Escuchamos cambios de sesión
 supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   currentUser = session?.user || null;
   isAdmin = userIsAdmin(currentUser);
-  console.log('onAuthStateChange → user:', currentUser?.email, 'isAdmin:', isAdmin);
+  console.log(
+    'onAuthStateChange → user:',
+    currentUser?.email,
+    'isAdmin:',
+    isAdmin
+  );
   updateAdminUI();
   await loadProducts();
+
   if (isAdmin) {
     await loadOrders();
-    await loadAnalytics();
-  }else {
-    resetAnalyticsUI();
-    }
-});
-
-(async () => {
-  try {
-  await ensureSession();
-  await loadProducts();
-
-  if (isAdmin) {
-    // No bloqueamos el splash con llamadas de admin que pueden tardar
-    loadOrders().catch((err) => {
-      console.error('[orders] fallo al cargar en el inicio', err);
-    });
-
+    // NO bloqueamos nada con await, solo en segundo plano
     loadAnalytics().catch((err) => {
-      console.error('[analytics] fallo al cargar en el inicio', err);
+      console.error('[analytics] fallo en onAuthStateChange', err);
       resetAnalyticsUI();
     });
-  }else {
+  } else {
     resetAnalyticsUI();
   }
+});
 
+// 🚀 Bootstrap principal
+(async function bootstrap() {
+  console.log('[bootstrap] iniciando app...');
+  try {
+    await ensureSession();
+    await loadProducts();
+
+    if (isAdmin) {
+      await loadOrders();
+      // Igual, estadísticas en segundo plano
+      loadAnalytics().catch((err) => {
+        console.error('[analytics] fallo al cargar en bootstrap', err);
+        resetAnalyticsUI();
+      });
+    } else {
+      resetAnalyticsUI();
+    }
   } catch (err) {
     console.error('[bootstrap] error inicializando app', err);
   } finally {
-
-  // Pase lo que pase, quitamos el splash
-  setTimeout(hideSplash, SPLASH_HIDE_DELAY);
-    }
-  // Respaldo: si por algo falla lo de arriba, al terminar de cargar la ventana
-  window.addEventListener('load', () => {
+    console.log('[bootstrap] listo → ocultando splash');
     setTimeout(hideSplash, SPLASH_HIDE_DELAY);
-  });
+  }
 })();
 
+// Respaldo: cuando termine de cargar la ventana, lo quitamos de nuevo por si acaso
+window.addEventListener('load', () => {
+  console.log('[splash] window load → ocultando splash');
+  setTimeout(hideSplash, SPLASH_HIDE_DELAY);
+});
+
 console.log('✅ app.js cargado correctamente');
+
 
 // =========================
 // SPLASH
@@ -1686,14 +1712,14 @@ console.log('✅ app.js cargado correctamente');
 let splashHidden = false;
 
 function hideSplash() {
-  if (splashHidden) return;      // evitamos doble ejecución
+  if (splashHidden) return; // evitamos doble ejecución
   splashHidden = true;
 
   const splash = document.getElementById('splash');
   if (!splash) return;
 
   console.log('[splash] ocultando pantalla de carga');
-  
+
   splash.classList.add('splash--hide');
 
   // Después de la transición lo removemos del DOM
@@ -1703,3 +1729,4 @@ function hideSplash() {
     }
   }, 600);
 }
+
