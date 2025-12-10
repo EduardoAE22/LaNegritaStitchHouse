@@ -1646,21 +1646,34 @@ supabaseClient.auth.onAuthStateChange(async (_event, session) => {
 });
 
 (async () => {
+  try {
   await ensureSession();
   await loadProducts();
+
   if (isAdmin) {
     await loadOrders();
-    await loadAnalytics();
+
+    // 🚫 IMPORTANTE: NO hacemos "await" aquí, lo lanzamos en segundo plano
+    loadAnalytics()
+    .catch((err) => {
+          console.error('[analytics] fallo al cargar en el inicio', err);
+          resetAnalyticsUI();
+        });
   }else {
     resetAnalyticsUI();
   }
 
-   hideSplash();
+  } catch (err) {
+    console.error('[bootstrap] error inicializando app', err);
+  } finally {
 
+  // Pase lo que pase, quitamos el splash
+  setTimeout(hideSplash, SPLASH_HIDE_DELAY);
+    }
+  // Respaldo: si por algo falla lo de arriba, al terminar de cargar la ventana
   window.addEventListener('load', () => {
-    hideSplash();
+    setTimeout(hideSplash, SPLASH_HIDE_DELAY);
   });
-  
 })();
 
 console.log('✅ app.js cargado correctamente');
@@ -1678,6 +1691,8 @@ function hideSplash() {
   const splash = document.getElementById('splash');
   if (!splash) return;
 
+  console.log('[splash] ocultando pantalla de carga');
+  
   splash.classList.add('splash--hide');
 
   // Después de la transición lo removemos del DOM
