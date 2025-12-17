@@ -205,8 +205,9 @@ async function loadProducts() {
 
     const url =
       `${SUPABASE_URL}/rest/v1/products` +
-      '?select=id,nombre,precio,categoria,descripcion,stock,imagen_url' +
-      '&order=nombre.asc';
+        '?select=id,nombre,precio,categoria,descripcion,stock,imagen_url,activo' +
+        '&activo=eq.true' +          // 👈 solo productos activos
+        '&order=nombre.asc';
 
     const res = await fetch(url, {
       headers: {
@@ -233,6 +234,7 @@ async function loadProducts() {
       categoria: p.categoria,
       imagen: p.imagen_url || '',
       stock: typeof p.stock === 'number' ? p.stock : null,
+      activo: p.activo !== false,  // por si luego lo necesitas
     }));
 
     buildFilters(products);
@@ -1412,10 +1414,10 @@ async function handleDeleteProduct(product) {
   const imagePath = getStoragePathFromUrl(product.imagen);
 
   try {
-    // 1) Borrar fila de la tabla products
+    // 1) Marcar producto como inactivo (soft delete)
     const { error } = await supabaseClient
       .from('products')
-      .delete()
+      .update({ activo: false })
       .eq('id', product.id);
 
     if (error) throw error;
@@ -1435,7 +1437,7 @@ async function handleDeleteProduct(product) {
       }
     }
 
-    alert('Producto eliminado.');
+    alert('Producto ocultado del catálogo.');
     await loadProducts();
     goBackToCatalog();
   } catch (err) {
