@@ -84,8 +84,8 @@ const SPLASH_HIDE_DELAY = 2500; // 3 segundos (ajusta al gusto)
 
 // Inicializar Supabase client
 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// Exponer en window para depurar
-window.supabaseClient = supabaseClient;
+// (Opcional) Evita exponer el cliente globalmente en producción
+// window.supabaseClient = supabaseClient;
 
 // Utils
 function normalizeEmail(email) {
@@ -98,11 +98,8 @@ function userIsAdmin(user) {
   const email = normalizeEmail(user.email);
   const allowList = ADMIN_EMAILS.map(normalizeEmail);
   
-  //Rol que viene desde Supabase
-  const role =
-    user?.app_metadata?.role ||
-    user?.user_metadata?.role ||
-    null;
+  // Rol CONFIABLE: solo app_metadata (no user_metadata, porque el usuario puede editarlo)
+  const role = user?.app_metadata?.role || null;
 
   return (
     allowList.includes(email) || // lista blanca (tú)
@@ -201,30 +198,18 @@ async function loadProducts() {
   setProductsFeedback('Cargando catálogo...', false);
 
   try {
-    console.log('[loadProducts] iniciando consulta REST…');
+    console.log('[loadProducts] consulta con supabase-js…');
 
-    const url =
-      `${SUPABASE_URL}/rest/v1/products` +
-        '?select=id,nombre,precio,categoria,descripcion,stock,imagen_url,activo' +
-        '&activo=eq.true' +          // 👈 solo productos activos
-        '&order=nombre.asc';
+    const { data, error } = await supabaseClient
+      .from('products')
+      .select('id,nombre,precio,categoria,descripcion,stock,imagen_url,activo')
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
 
-    const res = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('[loadProducts] error HTTP', res.status, text);
-      throw new Error(`Supabase respondió ${res.status}`);
+    if (error) {
+      console.error('[loadProducts] error', error);
+      throw error;
     }
-
-    const data = await res.json();
-    console.log('[loadProducts] datos recibidos →', data);
 
     products = (data || []).map((p) => ({
       id: p.id,
@@ -234,20 +219,17 @@ async function loadProducts() {
       categoria: p.categoria,
       imagen: p.imagen_url || '',
       stock: typeof p.stock === 'number' ? p.stock : null,
-      activo: p.activo !== false,  // por si luego lo necesitas
+      activo: p.activo !== false,
     }));
 
     buildFilters(products);
     renderProducts();
 
-    setProductsFeedback(
-      products.length ? '' : 'Aún no hay productos cargados.',
-      false
-    );
+    setProductsFeedback(products.length ? '' : 'Aún no hay productos cargados.', false);
   } catch (err) {
     console.error('Error cargando productos:', err);
     setProductsFeedback(
-      'No se pudieron cargar los productos desde Supabase. Revisa tu conexión o las credenciales.',
+      'No se pudieron cargar los productos desde Supabase. Revisa tu conexión o las políticas (RLS).',
       true
     );
   }
@@ -581,7 +563,14 @@ function renderCart() {
 
     const info = document.createElement('div');
     info.className = 'cart-item__info';
-    info.innerHTML = `<strong>${item.nombre}</strong><br>$${item.precio} MXN c/u`;
+    // ⚠️ Evitamos innerHTML para no abrir la puerta a XSS si algún dato viene contaminado
+    const strong = document.createElement('strong');
+    strong.textContent = item.nombre;
+    const priceLine = document.createElement('div');
+    priceLine.textContent = `$${item.precio} MXN c/u`;
+    info.appendChild(strong);
+    info.appendChild(document.createElement('br'));
+    info.appendChild(priceLine);
 
     const qty = document.createElement('div');
     qty.className = 'cart-item__qty';
@@ -764,31 +753,18 @@ async function loadOrders() {
   }
 
   try {
-    console.log('[orders] cargando pedidos (REST)...');
+    console.log('[orders] cargando pedidos (supabase-js)...');
 
-    const url =
-      `${SUPABASE_URL}/rest/v1/orders` +
-      '?select=id,created_at,status,total,customer_email' +
-      '&order=created_at.desc' +
-      '&limit=50';
+    const { data, error } = await supabaseClient
+      .from('orders')
+      .select('id,created_at,status,total,customer_email')
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-    const res = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const text = await res.text();
-    console.log('[orders] HTTP status =', res.status, 'body =', text);
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+    if (error) {
+      console.error('[orders] error', error);
+      throw error;
     }
-
-    const data = text ? JSON.parse(text) : [];
-    console.log('[orders] data parseada →', data);
 
     orders = data || [];
     renderOrders();
@@ -1183,6 +1159,9 @@ function closeCart() {
 
 async function saveOrderToSupabase() {
   if (cart.length === 0) return null;
+  if (!currentUser) {
+    throw new Error('Debes iniciar sesión para completar el pedido.');
+  }
 
   const total = getCartTotal();
 
@@ -1192,6 +1171,7 @@ async function saveOrderToSupabase() {
     null;
 
   const orderPayload = {
+    customer_id: currentUser.id,
     total,
     status: 'pending',
     customer_email: currentUser?.email || null,
@@ -1230,31 +1210,8 @@ async function saveOrderToSupabase() {
     throw itemsError;
   }
 
-  // 3) Actualizar stock de cada producto (si tiene stock definido)
-  for (const item of cart) {
-    const product = products.find((p) => p.id === item.id);
-    if (!product) continue;
-
-    if (typeof product.stock === 'number' && !Number.isNaN(product.stock)) {
-      const newStock = Math.max(product.stock - item.cantidad, 0);
-
-      const { error: updateError } = await supabaseClient
-        .from('products')
-        .update({ stock: newStock })
-        .eq('id', product.id);
-
-      if (updateError) {
-        console.warn(
-          '[orders] Pedido guardado pero no se pudo actualizar stock del producto',
-          product.id,
-          updateError
-        );
-      } else {
-        // actualizar en memoria para que la UI quede al día
-        product.stock = newStock;
-      }
-    }
-  }
+  // 3) El stock se actualiza en la BD (trigger) al insertar order_items.
+  //    No lo actualizamos desde el cliente para evitar manipulación y respetar RLS.
 
   return orderId;
 }
@@ -1649,29 +1606,30 @@ setTimeout(() => {
 }, SPLASH_MAX_WAIT);
 
 // 🔄 Escuchamos cambios de sesión
-supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+// 🔄 Escuchamos cambios de sesión (NO usar async/await aquí para evitar deadlocks)
+supabaseClient.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
   isAdmin = userIsAdmin(currentUser);
-  console.log(
-    'onAuthStateChange → user:',
-    currentUser?.email,
-    'isAdmin:',
-    isAdmin
-  );
-  updateAdminUI();
-  await loadProducts();
 
-  if (isAdmin) {
-    await loadOrders();
-    // NO bloqueamos nada con await, solo en segundo plano
-    loadAnalytics().catch((err) => {
-      console.error('[analytics] fallo en onAuthStateChange', err);
+  console.log('onAuthStateChange → user:', currentUser?.email, 'isAdmin:', isAdmin);
+  updateAdminUI();
+
+  // Ejecuta después del tick actual (evita lock interno de auth)
+  setTimeout(() => {
+    loadProducts().catch((err) => console.error('[loadProducts] fallo post-auth', err));
+
+    if (isAdmin) {
+      loadOrders().catch((err) => console.error('[orders] fallo post-auth', err));
+      loadAnalytics().catch((err) => {
+        console.error('[analytics] fallo post-auth', err);
+        resetAnalyticsUI();
+      });
+    } else {
       resetAnalyticsUI();
-    });
-  } else {
-    resetAnalyticsUI();
-  }
+    }
+  }, 0);
 });
+
 
 // 🚀 Bootstrap principal
 (async function bootstrap() {
@@ -1732,3 +1690,4 @@ function hideSplash() {
   }, 600);
 }
 
+document.getElementById('year').textContent = new Date().getFullYear();

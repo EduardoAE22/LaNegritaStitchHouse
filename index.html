@@ -4,7 +4,7 @@
  
   <meta charset="UTF-8" />
   <title>La Negrita Stitch House</title>
-  <meta name="descripcion" content="Tienda de ropa, bolsas y accesorios hechos a mano en Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
+  <meta name="description" content="Tienda de ropa, bolsas y accesorios hechos a mano en Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
 
   <!-- Favicons e íconos para dispositivos -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -18,22 +18,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    window.__SUPABASE_URL = 'https://wcpyvpvyoqmrukmvqfwt.supabase.co';
-    window.__SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjcHl2cHZ5b3FtcnVrbXZxZnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMTc4MDYsImV4cCI6MjA3OTY5MzgwNn0.EeFMe4x3A0R9wFsmv11R6ru2bqHS_00W5C38x2jgFio';
-  </script>
-  
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K3TGNFXF82"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+  <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        base-uri 'self';
+        object-src 'none';
+        frame-ancestors 'none';
+        form-action 'self';
 
-    gtag('config', 'G-K3TGNFXF82');
-  </script>
+        img-src 'self' data: https:;
+        font-src 'self' https://fonts.gstatic.com data:;
+        style-src 'self' https://fonts.googleapis.com;
+
+        script-src 'self'
+          https://cdn.jsdelivr.net
+          https://www.googletagmanager.com
+          https://www.google-analytics.com;
+        connect-src 'self'
+          https://wcpyvpvyoqmrukmvqfwt.supabase.co
+          https://*.supabase.co
+          wss://wcpyvpvyoqmrukmvqfwt.supabase.co
+          wss://*.supabase.co
+          https://www.google-analytics.com
+          https://region1.google-analytics.com;
+
+        upgrade-insecure-requests;
+      ">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <script src="config.js"></script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K3TGNFXF82"></script>
+  <script defer src="analytics.js"></script>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
+  
+  <!-- App -->
+  <script defer src="app.js"></script>
 
 </head>
 
@@ -404,11 +427,6 @@
       </span>
     </p>
   </footer>
-
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-  <script src="app.js"></script>
 
   <!-- Modal para ver la imagen en grande -->
   <div id="image-modal" class="image-modal">
