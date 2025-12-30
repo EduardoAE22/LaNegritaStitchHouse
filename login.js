@@ -15,16 +15,30 @@ const signupBtn = document.getElementById('signup-btn');
 const forgotBtn = document.getElementById('forgot-btn');
 const msg = document.getElementById('msg');
 
-function getSafeNext(defaultPath = 'index.html') {
+function getBaseDir() {
+  // En GH Pages project: /LaNegritaStitchHouse/
+  // En localhost: /
+  return new URL('.', window.location.href).pathname;
+}
+
+function getSafeNext(defaultFile = 'index.html') {
+  const baseDir = getBaseDir();
   const params = new URLSearchParams(window.location.search);
   const next = params.get('next');
-  if (!next) return defaultPath;
+  const fallback = baseDir + defaultFile;
+
+  if (!next) return fallback;
+
   try {
-    const url = new URL(next, window.location.origin);
-    if (url.origin !== window.location.origin) return defaultPath;
+    // OJO: resolvemos relativo al repo, no al origin raíz
+    const url = new URL(next, window.location.origin + baseDir);
+
+    if (url.origin !== window.location.origin) return fallback;
+    if (!url.pathname.startsWith(baseDir)) return fallback;
+
     return url.pathname + url.search + url.hash;
   } catch (_err) {
-    return defaultPath;
+    return fallback;
   }
 }
 
