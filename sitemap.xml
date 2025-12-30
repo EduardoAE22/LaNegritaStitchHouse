@@ -4,15 +4,18 @@
     <loc>https://eduardoae22.github.io/LaNegritaStitchHouse/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <lastmod>2025-12-25</lastmod>
   </url>
   <url>
     <loc>https://eduardoae22.github.io/LaNegritaStitchHouse/reset.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
+    <lastmod>2025-12-25</lastmod>
   </url>
   <url>
     <loc>https://eduardoae22.github.io/LaNegritaStitchHouse/signup.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <lastmod>2025-12-25</lastmod>
   </url>
 </urlset>

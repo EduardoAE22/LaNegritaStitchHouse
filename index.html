@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
- 
+
   <meta charset="UTF-8" />
-  <title>La Negrita Stitch House</title>
-  <meta name="description" content="Tienda de ropa, bolsas y accesorios hechos a mano en Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
+  <title>La Negrita Stitch House | Bolsas y ropa hecha a mano en Carmen, Campeche</title>
+
+  <!-- SEO básico -->
+  <meta name="description" content="La Negrita Stitch House: tienda de ropa, bolsas y accesorios hechos a mano en Ciudad del Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
+  <meta name="robots" content="index, follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Google Search Console -->
   <meta name="google-site-verification" content="-lBmRt7u5UJr20XnxRB75Ooy6AQ8fm8UR5JenWT9QhE" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://eduardoae22.github.io/LaNegritaStitchHouse/" />
 
   <!-- Favicons e íconos para dispositivos -->
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -16,11 +23,26 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="manifest" href="site.webmanifest">
 
+  <!-- Open Graph (para compartir en Facebook, WhatsApp, etc.) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_MX" />
+  <meta property="og:title" content="La Negrita Stitch House | Hecho a mano en Carmen" />
+  <meta property="og:description" content="Bolsas, ropa y accesorios hechos a mano en Ciudad del Carmen, Campeche. Diseños únicos y pedidos personalizados." />
+  <meta property="og:url" content="https://eduardoae22.github.io/LaNegritaStitchHouse/" />
+  <meta property="og:image" content="https://eduardoae22.github.io/LaNegritaStitchHouse/apple-touch-icon.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="La Negrita Stitch House | Hecho a mano en Carmen" />
+  <meta name="twitter:description" content="Tienda de ropa, bolsas y accesorios hechos a mano en Ciudad del Carmen, Campeche. Piezas únicas y personalizadas." />
+  <meta name="twitter:image" content="https://eduardoae22.github.io/LaNegritaStitchHouse/apple-touch-icon.png" />
+
   <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Seguridad (CSP) -->
   <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         base-uri 'self';
@@ -47,8 +69,10 @@
         upgrade-insecure-requests;
       ">
 
+  <!-- Estilos -->
   <link rel="stylesheet" href="styles.css" />
 
+  <!-- Config pública (Supabase keys ocultas en config.js) -->
   <script src="config.js"></script>
 
   <!-- Google Analytics -->
@@ -58,7 +82,7 @@
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
   
-  <!-- App -->
+  <!-- App principal -->
   <script defer src="app.js"></script>
 
 </head>
