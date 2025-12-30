@@ -14,6 +14,25 @@ const supabaseClient = window.supabase.createClient(
 
 const form = document.getElementById('signup-form');
 const messageEl = document.getElementById('signup-message');
+const loginLink = document.getElementById('login-link');
+
+function getSafeNext(defaultPath = 'index.html') {
+  const params = new URLSearchParams(window.location.search);
+  const next = params.get('next');
+  if (!next) return defaultPath;
+  try {
+    const url = new URL(next, window.location.origin);
+    if (url.origin !== window.location.origin) return defaultPath;
+    return url.pathname + url.search + url.hash;
+  } catch (_err) {
+    return defaultPath;
+  }
+}
+
+const safeNext = getSafeNext('index.html');
+if (loginLink) {
+  loginLink.href = `login.html?next=${encodeURIComponent(safeNext)}`;
+}
 
 function showSignupMessage(text, isError = false) {
   if (!messageEl) {
@@ -82,12 +101,13 @@ if (form) {
           false
         );
         form.reset();
+        window.location.href = `login.html?signup=1&next=${encodeURIComponent(safeNext)}`;
         return;
       }
 
       // Si no se exige confirmación por correo y ya hay sesión:
       showSignupMessage('Cuenta creada. Redirigiendo al catálogo...');
-      window.location.href = 'index.html#catalogo-destacado';
+      window.location.href = safeNext || 'index.html';
     } catch (err) {
       console.error('[signup] excepción inesperada', err);
       showSignupMessage(

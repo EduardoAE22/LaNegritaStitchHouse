@@ -6,6 +6,31 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjcHl2cHZ5b3FtcnVrbXZxZnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMTc4MDYsImV4cCI6MjA3OTY5MzgwNn0.EeFMe4x3A0R9wFsmv11R6ru2bqHS_00W5C38x2jgFio';
 
 const supabaseLoginClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const signupLink = document.getElementById('signup-link');
+const form = document.getElementById('auth-form');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const submitBtn = document.getElementById('submit-btn');
+const signupBtn = document.getElementById('signup-btn');
+const forgotBtn = document.getElementById('forgot-btn');
+const msg = document.getElementById('msg');
+
+function getSafeNext(defaultPath = 'index.html') {
+  const params = new URLSearchParams(window.location.search);
+  const next = params.get('next');
+  if (!next) return defaultPath;
+  try {
+    const url = new URL(next, window.location.origin);
+    if (url.origin !== window.location.origin) return defaultPath;
+    return url.pathname + url.search + url.hash;
+  } catch (_err) {
+    return defaultPath;
+  }
+}
+
+function redirectToNext() {
+  window.location.href = getSafeNext('index.html');
+}
 
 (async function initLogin() {
   const params = new URLSearchParams(window.location.search);
@@ -45,9 +70,14 @@ const supabaseLoginClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_
 
     // Si hay usuario, mandamos al catálogo
     if (user) {
-      console.log('[login] sesión activa → redirigir a index.html');
-      window.location.replace('index.html');
+      console.log('[login] sesión activa → redirigir a next seguro');
+      redirectToNext();
       return;
+    }
+
+    if (signupLink) {
+      const safeNext = getSafeNext('index.html');
+      signupLink.href = `signup.html?next=${encodeURIComponent(safeNext)}`;
     }
 
     // Si no hay usuario, aquí ya puedes mostrar tu formulario existente
@@ -57,14 +87,6 @@ const supabaseLoginClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_
     console.error('[login] error en initLogin()', err);
   }
 })();
-
-const form = document.getElementById('auth-form');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const submitBtn = document.getElementById('submit-btn');
-const signupBtn = document.getElementById('signup-btn');
-const forgotBtn = document.getElementById('forgot-btn');
-const msg = document.getElementById('msg');
 
 function setMessage(text, isError = false) {
   msg.textContent = text;
@@ -98,7 +120,7 @@ form.addEventListener('submit', async (e) => {
   }
 
   setMessage('Sesión iniciada, redirigiendo...');
-  window.location.href = 'index.html';
+  redirectToNext();
 });
 
 // SIGNUP

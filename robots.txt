@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://eduardoae22.github.io/LaNegritaStitchHouse/sitemap.xml

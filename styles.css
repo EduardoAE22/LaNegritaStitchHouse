@@ -461,6 +461,17 @@ main {
   color: #6b7280;
 }
 
+.product-card__note {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  opacity: 0.85;
+  line-height: 1.2;
+}
+
+.product-card__note--out {
+  color: #b00020;
+}
+
 .product-card__price {
   font-weight: 600;
   margin-bottom: 0.25rem;
@@ -514,6 +525,25 @@ main {
 .badge--yellow {
   background: #fff2b3;
   color: #8a6b00;
+}
+
+.admin-btn--user {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.05;
+  gap: 2px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.admin-btn__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.admin-btn__sub {
+  font-size: 0.7rem;
+  opacity: 0.85;
 }
 
 /* LISTAS PERSONALIZADAS */

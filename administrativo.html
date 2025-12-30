@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <meta charset="UTF-8" />
+  <title>La Negrita Stitch House | Bolsas y ropa hecha a mano en Carmen, Campeche</title>
+
+  <!-- SEO básico -->
+  <meta name="description" content="La Negrita Stitch House: tienda de ropa, bolsas y accesorios hechos a mano en Ciudad del Carmen, Campeche, México. Piezas únicas, pedidos personalizados y atención por WhatsApp." />
+  <meta name="robots" content="index, follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Google Search Console -->
+  <meta name="google-site-verification" content="-lBmRt7u5UJr20XnxRB75Ooy6AQ8fm8UR5JenWT9QhE" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://eduardoae22.github.io/LaNegritaStitchHouse/" />
+
+  <!-- Favicons e íconos para dispositivos -->
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- Open Graph (para compartir en Facebook, WhatsApp, etc.) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_MX" />
+  <meta property="og:title" content="La Negrita Stitch House | Hecho a mano en Carmen" />
+  <meta property="og:description" content="Bolsas, ropa y accesorios hechos a mano en Ciudad del Carmen, Campeche. Diseños únicos y pedidos personalizados." />
+  <meta property="og:url" content="https://eduardoae22.github.io/LaNegritaStitchHouse/" />
+  <meta property="og:image" content="https://eduardoae22.github.io/LaNegritaStitchHouse/apple-touch-icon.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="La Negrita Stitch House | Hecho a mano en Carmen" />
+  <meta name="twitter:description" content="Tienda de ropa, bolsas y accesorios hechos a mano en Ciudad del Carmen, Campeche. Piezas únicas y personalizadas." />
+  <meta name="twitter:image" content="https://eduardoae22.github.io/LaNegritaStitchHouse/apple-touch-icon.png" />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Seguridad (CSP) -->
+  <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        base-uri 'self';
+        object-src 'none';
+        form-action 'self';
+
+        img-src 'self' data: https:;
+        font-src 'self' https://fonts.gstatic.com data:;
+        style-src 'self' https://fonts.googleapis.com;
+
+        script-src 'self'
+          https://cdn.jsdelivr.net
+          https://www.googletagmanager.com
+          https://www.google-analytics.com;
+        connect-src 'self'
+          https://wcpyvpvyoqmrukmvqfwt.supabase.co
+          https://*.supabase.co
+          wss://wcpyvpvyoqmrukmvqfwt.supabase.co
+          wss://*.supabase.co
+          https://www.google-analytics.com
+          https://region1.google-analytics.com;
+
+        upgrade-insecure-requests;
+      ">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-K3TGNFXF82"></script>
+  <script defer src="analytics.js"></script>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
+  
+  <!-- App administrativo -->
+  <script defer src="admin.js"></script>
+
+</head>
+
+<body data-page="admin">
+  <header class="header header--admin">
+    <div class="header__inner">
+      <div class="header__logo">
+        <img src="img/logo-la-negrita-stitch-house.jpeg" alt="La Negrita Stitch House" class="logo-img">
+      </div>
+      <div class="header__actions">
+        <a class="btn-outline" href="index.html">Volver a la tienda</a>
+        <button id="admin-btn" class="btn-primary" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="section section--light">
+    <div class="section__header">
+      <h1>Panel administrativo</h1>
+      <p>Gestiona productos, pedidos y estadísticas.</p>
+    </div>
+
+    <div id="admin-panel" class="admin-panel">
+      <div class="admin-panel__header">
+        <strong>Panel admin</strong>
+        <span id="admin-status" class="admin-panel__status">Acceso solo para administradores autorizados</span>
+      </div>
+      <form id="admin-form" class="admin-form">
+        <input type="hidden" id="product-id" name="id">
+
+        <div class="admin-form__grid">
+          <label>
+            Nombre
+            <input id="product-nombre" name="nombre" type="text" required>
+          </label>
+          <label>
+            Precio (MXN)
+            <input id="product-precio" name="precio" type="number" step="0.01" required>
+          </label>
+          <label>
+            Piezas disponibles
+            <input
+              id="product-stock"
+              name="stock"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Ej. 5"
+            >
+          </label>
+          <label>
+            Categoría
+            <select id="product-categoria" name="categoria" required>
+              <option value="">Selecciona categoría</option>
+              <option value="Ropa">Ropa</option>
+              <option value="Bolsas">Bolsas</option>
+              <option value="Accesorios">Accesorios</option>
+              <option value="Edición especial">Edición especial</option>
+            </select>
+          </label>
+          <label class="admin-form__span2">
+            Descripción
+            <textarea id="product-descripcion" name="descripcion" rows="2"></textarea>
+          </label>
+          <label class="admin-form__span2">
+            Imagen (opcional)
+            <input id="product-imagen" name="imagen" type="file" accept="image/*">
+          </label>
+        </div>
+        <div class="admin-form__actions">
+          <button type="submit" class="btn-primary">Guardar</button>
+          <button type="button" id="admin-reset" class="btn-outline">Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- PANEL DE PEDIDOS (solo admin) -->
+    <section id="admin-orders" class="admin-orders admin-only section section--light">
+      <div class="section__header">
+        <h2>Pedidos recientes</h2>
+        <p>Solo visible para administración. Aquí puedes marcar pedidos como pagados o cancelados.</p>
+      </div>
+
+      <div class="admin-orders__table-wrapper">
+        <table class="admin-orders__table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-orders-tbody">
+            <!-- JS inyecta filas aquí -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL DE VENTAS / ANALÍTICA (solo admin) -->
+    <section id="admin-analytics" class="admin-only section section--light">
+      <div class="section__header">
+        <h2>Resumen de ventas</h2>
+        <p>Vista rápida de cómo va la tienda.</p>
+      </div>
+
+      <div class="analytics-grid">
+        <!-- Ventas -->
+        <article class="analytics-card">
+          <h3 class="analytics-card__title">Ventas</h3>
+          <ul class="analytics-list">
+            <li>
+              <span>Hoy</span>
+              <strong id="analytics-sales-today">—</strong>
+            </li>
+            <li>
+              <span>Últimos 7 días</span>
+              <strong id="analytics-sales-week">—</strong>
+            </li>
+            <li>
+              <span>Este mes</span>
+              <strong id="analytics-sales-month">—</strong>
+            </li>
+            <li>
+              <span>Este año</span>
+              <strong id="analytics-sales-year">—</strong>
+            </li>
+          </ul>
+        </article>
+
+        <!-- Productos -->
+        <article class="analytics-card">
+          <h3 class="analytics-card__title">Productos</h3>
+          <p class="analytics-label">Más vendido</p>
+          <p id="analytics-top-product" class="analytics-value">Sin datos aún</p>
+
+          <p class="analytics-label">Menos vendido</p>
+          <p id="analytics-bottom-product" class="analytics-value">Sin datos aún</p>
+        </article>
+
+        <!-- Clientes -->
+        <article class="analytics-card">
+          <h3 class="analytics-card__title">Clientes</h3>
+          <p class="analytics-label">Cliente con más consumo</p>
+          <p id="analytics-top-customer" class="analytics-value">Sin datos aún</p>
+
+          <p class="analytics-label">Cliente con menos consumo</p>
+          <p id="analytics-bottom-customer" class="analytics-value">Sin datos aún</p>
+        </article>
+      </div>
+
+      <div class="analytics-table-wrapper">
+        <h3 class="analytics-table__title">Clientes con pedidos</h3>
+        <p class="analytics-table__subtitle">
+          Lista de clientes que ya han realizado al menos un pedido.
+        </p>
+        <div class="admin-orders__table-wrapper">
+          <table class="admin-orders__table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Correo</th>
+                <th>Primer pedido</th>
+                <th># Pedidos</th>
+                <th>Total consumido</th>
+              </tr>
+            </thead>
+            <tbody id="analytics-customers-tbody">
+              <tr>
+                <td colspan="5">Aún no hay clientes con pedidos.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
