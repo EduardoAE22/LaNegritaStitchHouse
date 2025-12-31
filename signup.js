@@ -12,6 +12,9 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
+const savedThemeSignup = localStorage.getItem('ln_theme');
+document.body.dataset.theme = savedThemeSignup || 'default';
+
 const form = document.getElementById('signup-form');
 const messageEl = document.getElementById('signup-message');
 const loginLink = document.getElementById('login-link');

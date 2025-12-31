@@ -1,1 +1,5 @@
 config.js
+
+# Backups locales
+backup-*.tar.gz
+*.tar.gz

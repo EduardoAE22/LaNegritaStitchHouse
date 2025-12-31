@@ -6,6 +6,10 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjcHl2cHZ5b3FtcnVrbXZxZnd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMTc4MDYsImV4cCI6MjA3OTY5MzgwNn0.EeFMe4x3A0R9wFsmv11R6ru2bqHS_00W5C38x2jgFio';
 
 const supabaseLoginClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const savedThemeAuth = localStorage.getItem('ln_theme');
+document.body.dataset.theme = savedThemeAuth || 'default';
+
 const signupLink = document.getElementById('signup-link');
 const form = document.getElementById('auth-form');
 const emailInput = document.getElementById('email');

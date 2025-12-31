@@ -78,6 +78,7 @@
   
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1"></script>
+  <script src="themes.config.js" defer></script>
   
   <!-- App principal -->
   <script defer src="store.js"></script>
@@ -116,10 +117,11 @@
       <a href="#hecho-a-mano">Hecho a mano</a>
       <a href="#personalizados">Personalizados</a>
       <a href="#contacto">Contacto</a>
+      <button type="button" id="themes-btn" class="header__nav-link">Temas</button>
     </nav>
 
     <div class="header__actions">
-      <a id="admin-link" class="btn-outline" href="administrativo.html" style="display:none">Administrativo</a>
+      <a id="admin-link" class="btn-outline" href="administrativo.html" hidden>Administrativo</a>
       <button id="admin-btn" class="btn-outline" type="button">Admin</button>
       <button id="cart-btn" class="btn-icon" aria-label="Carrito">
         🛒 <span id="cart-count" class="cart-count">0</span>
@@ -137,13 +139,13 @@
           La Negrita Stitch House convierte telas e hilos en piezas únicas:
           bolsas, ropa y detallitos hechos a mano con amor.
         </p>
-        <div class="hero__actions">
+        <!--<div class="hero__actions">
           <a href="#catalogo" class="btn-primary">Ver catálogo</a>
           <a href="https://wa.me/529381952228?text=Hola,%20quiero%20información%20sobre%20los%20productos%20de%20La%20Negrita%20Stitch%20House"
              class="btn-outline" target="_blank" rel="noopener">
             Encargar por WhatsApp
           </a>
-        </div>
+        </div>-->
       </div>
       <div class="hero__image">
         <img src="img/logo-la-negrita-stitch-house.jpeg"
@@ -311,6 +313,28 @@
       </button>
       <img id="image-modal-img" src="" alt="Imagen del producto">
       <p id="image-modal-caption" class="image-modal__caption"></p>
+    </div>
+  </div>
+
+  <!-- THEME MODAL -->
+  <div id="themes-modal" class="theme-modal" aria-hidden="true">
+    <div id="themes-modal-overlay" class="theme-modal__overlay"></div>
+
+    <div class="theme-modal__panel" role="dialog" aria-modal="true" aria-labelledby="themes-title">
+      <div class="theme-modal__header">
+        <div>
+          <h2 id="themes-title" class="theme-modal__title">Temas</h2>
+          <p class="theme-modal__subtitle">Elige un estilo visual para la tienda.</p>
+        </div>
+        <button type="button" id="themes-modal-close" class="theme-modal__close" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div id="themes-list" class="theme-modal__list" aria-label="Lista de temas"></div>
+
+      <div class="theme-modal__footer">
+        <button type="button" id="themes-reset" class="btn-outline theme-modal__footer-btn">Restaurar clásico</button>
+        <button type="button" id="themes-apply-close" class="btn-primary theme-modal__footer-btn">Listo</button>
+      </div>
     </div>
   </div>
 </body>

@@ -3,6 +3,7 @@
 // Config
 const WHATSAPP_NUMBER = '529381952228';
 const CART_STORAGE_KEY = 'ln_cart';
+const THEME_STORAGE_KEY = 'ln_theme';
 const SUPABASE_URL = window.__SUPABASE_URL || 'https://wcpyvpvyoqmrukmvqfwt.supabase.co';
 const SUPABASE_ANON_KEY =
   window.__SUPABASE_ANON_KEY ||
@@ -12,6 +13,38 @@ const ADMIN_EMAILS = ['acostasolutions.dev@gmail.com'];
 const ADMIN_DISPLAY_NAME_BY_EMAIL = {
   'acostasolutions.dev@gmail.com': 'Eduardo Acosta',
 };
+
+function getSavedTheme() {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  return stored || 'default';
+}
+
+function applyTheme(themeId) {
+  const target = themeId && typeof themeId === 'string' && themeId.trim()
+    ? themeId.trim()
+    : 'default';
+  document.body.dataset.theme = target;
+
+  const badgeEl = document.querySelector('.hero__badge');
+  if (badgeEl) {
+    if (!badgeEl.dataset.defaultText) {
+      badgeEl.dataset.defaultText = badgeEl.textContent || '';
+    }
+    if (target === 'reyes') {
+      badgeEl.textContent = '🎁 Edición Reyes';
+    } else {
+      badgeEl.textContent = badgeEl.dataset.defaultText || badgeEl.textContent || '';
+    }
+  }
+}
+
+function saveTheme(themeId) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeId || 'default');
+  } catch (err) {
+    console.warn('[theme] no se pudo guardar tema', err);
+  }
+}
 
 // Estado
 let products = [];
@@ -43,6 +76,7 @@ const cartItemsContainer = document.getElementById('cart-items');
 const cartTotalEl = document.getElementById('cart-total');
 const cartWhatsappBtn = document.getElementById('cart-whatsapp');
 const adminBtn = document.getElementById('admin-btn');
+const heroBadgeEl = document.querySelector('.hero__badge');
 
 const menuToggle = document.getElementById('menu-toggle');
 const headerNav = document.querySelector('.header__nav');
@@ -51,6 +85,19 @@ const adminLink = document.getElementById('admin-link');
 const catAddBtn = document.getElementById('cat-add-btn');
 const catEditBtn = document.getElementById('cat-edit-btn');
 const catDeleteBtn = document.getElementById('cat-delete-btn');
+const themesBtn = document.getElementById('themes-btn');
+const themesModal = document.getElementById('themes-modal');
+const themesModalOverlay = document.getElementById('themes-modal-overlay');
+const themesModalClose = document.getElementById('themes-modal-close');
+const themesList = document.getElementById('themes-list');
+const themesReset = document.getElementById('themes-reset');
+const themesApplyClose = document.getElementById('themes-apply-close');
+
+if (heroBadgeEl && !heroBadgeEl.dataset.defaultText) {
+  heroBadgeEl.dataset.defaultText = heroBadgeEl.textContent || '';
+}
+
+applyTheme(getSavedTheme());
 
 const categoryCards = document.querySelectorAll('.category-card');
 
@@ -154,11 +201,13 @@ function renderSessionButton(user) {
 function updateAdminUI() {
   const showAdmin = !!isAdmin;
   if (adminLink) {
-    adminLink.style.display = showAdmin ? 'inline-flex' : 'none';
+    adminLink.hidden = !showAdmin;
+    if (showAdmin) adminLink.removeAttribute('hidden');
+    else adminLink.setAttribute('hidden', '');
   }
-  if (catAddBtn) catAddBtn.style.display = showAdmin ? 'inline-flex' : 'none';
-  if (catEditBtn) catEditBtn.style.display = showAdmin ? 'inline-flex' : 'none';
-  if (catDeleteBtn) catDeleteBtn.style.display = showAdmin ? 'inline-flex' : 'none';
+  if (catAddBtn) catAddBtn.hidden = !showAdmin;
+  if (catEditBtn) catEditBtn.hidden = !showAdmin;
+  if (catDeleteBtn) catDeleteBtn.hidden = !showAdmin;
 
   renderSessionButton(currentUser);
 }
@@ -197,7 +246,7 @@ async function loadProducts() {
 
     const { data, error } = await supabaseClient
       .from('products')
-      .select('id,nombre,precio,categoria,descripcion,stock,imagen_url,activo')
+      .select('id,nombre,precio,costo,categoria,descripcion,stock,imagen_url,activo')
       .eq('activo', true)
       .order('nombre', { ascending: true });
 
@@ -210,6 +259,7 @@ async function loadProducts() {
       id: p.id,
       nombre: p.nombre,
       precio: p.precio,
+      costo: p.costo,
       descripcion: p.descripcion,
       categoria: p.categoria,
       imagen: p.imagen_url || '',
@@ -707,8 +757,10 @@ async function saveOrderToSupabase() {
     product_id: item.id,
     product_name: item.nombre,
     unit_price: item.precio,
+    unit_cost: Number(item.costo || 0),
     quantity: item.cantidad,
     subtotal: item.precio * item.cantidad,
+    cost_subtotal: Number(item.costo || 0) * item.cantidad,
   }));
 
   const { error: itemsError } = await supabaseClient
@@ -810,6 +862,74 @@ function closeMenu() {
 }
 
 // =========================
+// TEMAS
+// =========================
+function renderThemeList(activeId) {
+  if (!themesList) return;
+
+  themesList.textContent = '';
+  const themeOptions = Array.isArray(window.LN_THEMES) ? window.LN_THEMES : [];
+
+  if (!themeOptions.length) {
+    const empty = document.createElement('p');
+    empty.textContent = 'No hay temas disponibles.';
+    themesList.appendChild(empty);
+    return;
+  }
+
+  themeOptions.forEach((theme) => {
+    const item = document.createElement('div');
+    item.className = 'theme-item';
+    if (theme.id === activeId) {
+      item.classList.add('is-active');
+    }
+
+    const left = document.createElement('div');
+    left.className = 'theme-item__left';
+
+    const title = document.createElement('span');
+    title.className = 'theme-item__title';
+    title.textContent = theme.title || theme.id;
+
+    const sub = document.createElement('span');
+    sub.className = 'theme-item__sub';
+    sub.textContent = theme.subtitle || '';
+
+    left.appendChild(title);
+    left.appendChild(sub);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'theme-item__btn';
+    btn.textContent = theme.id === activeId ? 'Seleccionado' : 'Usar';
+
+    btn.addEventListener('click', () => {
+      applyTheme(theme.id);
+      saveTheme(theme.id);
+      renderThemeList(theme.id);
+    });
+
+    item.appendChild(left);
+    item.appendChild(btn);
+    themesList.appendChild(item);
+  });
+}
+
+function openThemesModal() {
+  if (!themesModal) return;
+  renderThemeList(getSavedTheme());
+  themesModal.classList.add('is-open');
+  themesModal.setAttribute('aria-hidden', 'false');
+  closeMenu();
+}
+
+function closeThemesModal() {
+  if (!themesModal) return;
+  themesModal.classList.remove('is-open');
+  themesModal.setAttribute('aria-hidden', 'true');
+}
+
+// =========================
 // MODAL IMAGEN PRODUCTO
 // =========================
 
@@ -887,18 +1007,44 @@ if (imageModalOverlay) {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     closeImageModal();
+    if (themesModal && themesModal.classList.contains('is-open')) {
+      closeThemesModal();
+    }
   }
 });
 
 if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
 if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
 
-document.querySelectorAll('.header__nav a').forEach((link) =>
+document.querySelectorAll('.header__nav a, .header__nav button').forEach((link) =>
   link.addEventListener('click', closeMenu)
 );
 window.addEventListener('resize', () => {
   if (window.innerWidth > 768) closeMenu();
 });
+
+if (themesBtn) {
+  themesBtn.addEventListener('click', () => {
+    closeMenu();
+    openThemesModal();
+  });
+}
+if (themesModalOverlay) {
+  themesModalOverlay.addEventListener('click', closeThemesModal);
+}
+if (themesModalClose) {
+  themesModalClose.addEventListener('click', closeThemesModal);
+}
+if (themesReset) {
+  themesReset.addEventListener('click', () => {
+    applyTheme('default');
+    saveTheme('default');
+    renderThemeList('default');
+  });
+}
+if (themesApplyClose) {
+  themesApplyClose.addEventListener('click', closeThemesModal);
+}
 
 
 // =========================
